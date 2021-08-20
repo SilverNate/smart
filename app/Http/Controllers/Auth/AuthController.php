@@ -8,10 +8,28 @@ use App\Models\User as ModelsUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class AuthController extends Controller
 {
-    //
+
+    public function isAdmin(Request $request): bool
+    {
+
+        try {
+            // Validate the value..
+            $roles = $request->user('api')->role_id;
+
+            if($roles == Config::get('constants.roles_id.school_admin')){
+                return true;
+            }
+        } catch (Throwable $e) {
+            report($e);
+
+            return false;
+        }
+    }
+
     public function login(Request $request)
     {
         $request->validate(['email' => 'required|string|email', 'password' => 'required|string']);
@@ -71,7 +89,7 @@ class AuthController extends Controller
         $user->password = bcrypt($request->password);
         $user->save();
         return response()
-            ->json(['message' => 'Successfully created Admin!'], 201);
+            ->json(['message' => 'Successfully created School Admin!'], 201);
     }
 
     public function registerUser(Request $request)
@@ -138,6 +156,44 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    public function loginUser(Request $request)
+    {
+
+        $request->validate(['school_id' => 'required|string', 'username' => 'required|string', 'password' => 'required|string']);
+
+        $validator = Validator::make(
+            ['password' => $request->password], ['password' => 'required|string'],
+            ['school_id' => $request->school_id], ['email' => 'required|string'],
+            ['username' => $request->username], ['username' => 'required|string'] );
+
+            if ($validator->fails())
+            {
+                return response()
+                    ->json(['errors' => $validator->errors() ], 406);
+            }
+
+        $credentials = ['school_id' => $request->school_id, 'username' => $request->username, 'password' => $request->password];
+
+        if (!Auth::attempt($credentials)) return response()->json(['message' => 'Unauthorized user'], 401);
+
+        if (Auth::check()) {
+            $user = $request->user();
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+
+            if ($request->remember_me) $token->expires_at = Carbon::now()
+                ->addWeeks(1);
+
+            $token->save();
+
+            return response()
+                ->json(['access_token' => $tokenResult->accessToken, 'token_type' => 'Bearer', 'expires_at' => Carbon::parse($tokenResult
+                ->token
+                ->expires_at)
+                ->toDateTimeString() ]);
+        }
     }
 }
 
