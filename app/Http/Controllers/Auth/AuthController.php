@@ -31,12 +31,44 @@ class AuthController extends Controller
         }
     }
 
+    public static function isTeacher(Request $request):bool
+    {
+        try {
+
+            $roles = $request->user('api')->role_id;
+
+            if($roles == Config::get('constants.roles_id.teacher')){
+                return true;
+            }
+        }catch (Throwable $e) {
+            report($e);
+
+            return false;
+        }
+    }
+
+    public static function isStudent(Request $request):bool
+    {
+        try {
+
+            $roles = $request->user('api')->role_id;
+
+            if($roles == Config::get('constants.roles_id.student')){
+                return true;
+            }
+        }catch (Throwable $e) {
+            report($e);
+
+            return false;
+        }
+    }
+
     public function login(Request $request)
     {
         $request->validate(['email' => 'required|string|email', 'password' => 'required|string']);
 
         $validator = Validator::make(
-            ['password' => $request->password], ['password' => 'required|string'], ['email' => $request->email], ['email' => 'required|string|email|unique:users'],);
+            ['password' => $request->password], ['password' => 'required|string'], ['email' => $request->email], ['email' => 'required|string|email|unique:users']);
 
             if ($validator->fails())
             {
@@ -66,7 +98,7 @@ class AuthController extends Controller
     public function registerAdmin(Request $request)
     {
         $validator = Validator::make(
-        ['school_name' => $request->school_name], ['school_name' => 'required|string'], ['email' => $request->email], ['email' => 'required|string|email|unique:users'], ['password' => $request->password], ['password' => 'required|string'],);
+        ['school_name' => $request->school_name], ['school_name' => 'required|string'], ['email' => $request->email], ['email' => 'required|string|email|unique:users'], ['password' => $request->password], ['password' => 'required|string']);
 
         if ($validator->fails())
         {

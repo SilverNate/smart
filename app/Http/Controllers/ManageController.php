@@ -70,8 +70,8 @@ class ManageController extends Controller
             $user = new ModelsUser();
             $user->username = $request->username;
             $user->email = $request->email;
-            $user->role_id = $request->role;
-            $user->role = Config::get("constants.roles.{$request->role}");
+            $user->role_id = Config::get("constants.roles_id.{$request->role}");
+            $user->role = $request->role;
             $user->school_id = $schoolIds;
             $user->school_name = $schoolName;
             $user->password = $password;

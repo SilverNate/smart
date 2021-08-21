@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ManageController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,3 +35,5 @@ Route::group([
 Route::get('view', [ManageController::class, 'adminView'])->name('adminView');
 Route::post('add', [ManageController::class, 'adminAdd'])->name('adminAdd');
 Route::post('delete', [ManageController::class, 'adminDelete'])->name('adminDelete');
+
+Route::post('view/teacher', [UserController::class, 'teacherView'])->name('teacherView');
