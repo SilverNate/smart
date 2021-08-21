@@ -58,7 +58,7 @@ class UserController extends Controller
                 }
 
                 return response()->json([
-                    'status' => ['code' => 200, "response" => "Success", "message" => "Successfully get aall data teacher."],
+                    'status' => ['code' => 200, "response" => "Success", "message" => "Successfully get all data teacher."],
                     'results' => $getStudent,
                 ]);
             }
@@ -66,6 +66,38 @@ class UserController extends Controller
         } else {
             return response()
                 ->json(['message' => 'Sorry, just teacher can see this.'], 400);
+        }
+    }
+
+    public function studentView(Request $request)
+    {
+        $roles  = $request->user('api')->role_id;
+        $params = strtolower($request->param);
+
+        if($roles == Config::get('constants.roles_id.student')){
+
+            if($params == "student" || $params == ""){
+
+                $getStudent = ModelsUser::where('role', 'student')->get();
+
+                if(empty($getStudent)){
+                    return response()
+                    ->json(['message' => 'Sorry, data not found.'], 400);
+                }
+
+                return response()->json([
+                    'status' => ['code' => 200, "response" => "Success", "message" => "Successfully get all data student."],
+                    'results' => $getStudent,
+                ]);
+            } else {
+
+                return response()
+                ->json(['message' => 'Sorry, please check your request.'], 400);
+            }
+        } else {
+
+            return response()
+            ->json(['message' => 'Sorry, just studennt can see this.'], 400);
         }
     }
 }

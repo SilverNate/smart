@@ -37,3 +37,4 @@ Route::post('add', [ManageController::class, 'adminAdd'])->name('adminAdd');
 Route::post('delete', [ManageController::class, 'adminDelete'])->name('adminDelete');
 
 Route::post('view/teacher', [UserController::class, 'teacherView'])->name('teacherView');
+Route::post('view/student', [UserController::class, 'studentView'])->name('studentView');
