@@ -1,6 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
-use App\User;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -13,7 +14,7 @@ use Throwable;
 class AuthController extends Controller
 {
 
-    public function isAdmin(Request $request): bool
+    public static function isAdmin(Request $request): bool
     {
 
         try {
@@ -103,7 +104,7 @@ class AuthController extends Controller
             $validator = Validator::make(
                 ['username' => $request->username], ['username' => 'required|string'],
                 ['email' => $request->email], ['email' => 'required|string|email|unique:users'],
-                ['role' => $request->role], ['role' => 'required|string'],);
+                ['role' => $request->role], ['role' => 'required|string']);
 
                 if ($validator->fails())
                 {
@@ -136,8 +137,10 @@ class AuthController extends Controller
              *
              **/
 
-            return response()
-                ->json(['message' => 'Successfully created user teacher or student.'], 201);
+            return response()->json([
+                'status' => ['code' => 201, "response" => "Success", "message" => "Successfully created user teacher or student."],
+                'results' => $user,
+            ]);
         }
 
         return response()
