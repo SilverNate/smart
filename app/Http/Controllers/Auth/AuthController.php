@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
+use Notification;
+use App\Notifications\MailNotification;
 
 class AuthController extends Controller
 {
@@ -134,6 +136,8 @@ class AuthController extends Controller
         $schoolIds = $request->user('api')->school_id;
         $schoolName =  $request->user('api')->school_name;
 
+        // echo $schoolIds;die;
+
         if($roles == Config::get('constants.roles_id.school_admin')){
 
             $validator = Validator::make(
@@ -171,6 +175,24 @@ class AuthController extends Controller
              * if success we should sent email data to user
              *
              **/
+
+            $user = ModelsUser::where('email', $user->email)->get();
+
+            $details = [
+                'greeting' => 'Hi guys',
+                'body' => "This is E-mail Notification just because you already invited to smart school system",
+                'body1'=> "Here your credential for login:",
+                'body2'=> "username : $request->username",
+                'body3'=> "password : $password",
+                'body4' => "school_id : $schoolIds",
+                'body5' => "Please keep this credentials just for you",
+                'thanks' => 'Thank you!',
+                'actionText' => 'View My Site',
+                'actionURL' => env('APP_URL'),
+                'order_id' => $request->username,
+            ];
+
+            Notification::send($user, new MailNotification($details));
 
             return response()->json([
                 'status' => ['code' => 201, "response" => "Success", "message" => "Successfully created user teacher or student."],
