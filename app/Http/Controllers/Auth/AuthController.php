@@ -92,7 +92,10 @@ class AuthController extends Controller
             ->json(['access_token' => $tokenResult->accessToken, 'token_type' => 'Bearer', 'expires_at' => Carbon::parse($tokenResult
             ->token
             ->expires_at)
-            ->toDateTimeString() ]);
+            ->toDateTimeString(),
+            'email' => $user->email,
+            'id' => $user->id,
+            'role' => $user->role ]);
     }
 
     public function registerAdmin(Request $request)
@@ -209,7 +212,31 @@ class AuthController extends Controller
                     ->json(['errors' => $validator->errors() ], 406);
             }
 
-        $credentials = ['school_id' => $request->school_id, 'username' => $request->username, 'password' => $request->password];
+        //find email
+        $getEmails = ModelsUser::where([
+                                    'username'=> $request->username,
+                                    'school_id' =>$request->school_id])
+                                    ->get();
+
+        // echo json_encode($getEmails);die;
+        $setEmails = [];
+        if(count($getEmails) > 0){
+            foreach($getEmails as $k=>$v){
+                $testAttempt = ['email' => $v['email'], 'password' => $request->password];
+                if(Auth::attempt($testAttempt) == true){
+                        array_push($setEmails, $v['email']);
+                }
+            }
+        }
+
+        if(count($setEmails) < 1 && empty($setEmails))
+        {
+            return response()->json([
+                'status' => ['code' => 400, "response" => "Error", "message" =>"credential wrongs"],
+            ]);
+        }
+
+        $credentials = ['email' => $setEmails[0], 'password' => $request->password];
 
         if (!Auth::attempt($credentials)) return response()->json(['message' => 'Unauthorized user'], 401);
 
@@ -227,7 +254,10 @@ class AuthController extends Controller
                 ->json(['access_token' => $tokenResult->accessToken, 'token_type' => 'Bearer', 'expires_at' => Carbon::parse($tokenResult
                 ->token
                 ->expires_at)
-                ->toDateTimeString() ]);
+                ->toDateTimeString(),
+                'email' => $user->email,
+                'id' => $user->id,
+                'role' => $user->role ]);
         }
     }
 }

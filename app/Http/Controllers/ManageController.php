@@ -17,9 +17,42 @@ class ManageController extends Controller
     public function adminView(Request $request)
     {
 
-        if(AuthController::isAdmin($request) == true){
+        $roles = $request->user('api')->role_id;
+        $role = Config::get("constants.roles.$roles");
+
+        if($role == "school_admin"){
 
             $user = ModelsUser::all();
+
+            if(empty($user)){
+                return response()->json([
+                    'status' => ['code' => 400, "response" => "Failed", "message" => "Failed to get all data user."]
+                ]);
+            }
+
+            return response()->json([
+                'status' => ['code' => 200, "response" => "Success", "message" => "Success get all user."],
+                'results' => $user,
+            ]);
+
+        } else if($role == "teacher"){
+
+            $user = ModelsUser::where('role','<>', 'school_admin')->get();
+
+            if(empty($user)){
+                return response()->json([
+                    'status' => ['code' => 400, "response" => "Failed", "message" => "Failed to get all data user."]
+                ]);
+            }
+
+            return response()->json([
+                'status' => ['code' => 200, "response" => "Success", "message" => "Success get all user."],
+                'results' => $user,
+            ]);
+
+        } else if($role == "student"){
+
+            $user = ModelsUser::where('role','=', 'student')->get();
 
             if(empty($user)){
                 return response()->json([
