@@ -22,7 +22,7 @@ class ManageController extends Controller
 
         if($role == "school_admin"){
 
-            $user = ModelsUser::all();
+            $user = ModelsUser::paginate(15) ;
 
             if(empty($user)){
                 return response()->json([
